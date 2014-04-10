@@ -6,11 +6,12 @@ migration_1_content = open('./migrations/001_create_users.cql').read()
 migration_2_content = open('./migrations/002_add_firstname.cql').read()
 
 
-class MigratorTests(unittest.TestCase):
+class ApplyingMigrationTests(unittest.TestCase):
     def setUp(self):
-        self.session = MagicMock()
-        self.session.execute = MagicMock()
+        self.session = Mock()
+        self.session.execute = Mock()
         self.migrator = Migrator('./migrations', self.session)
+        self.migrator.get_top_version = Mock(return_value=0)
 
     def test_it_should_make_sure_the_schema_migrations_table_exists(self):
         self.session.execute.assert_has_calls([call("""
@@ -40,6 +41,24 @@ class MigratorTests(unittest.TestCase):
         self.migrator.run_migrations()
 
         self.session.execute.assert_called_once_with(migration_2_content)
+
+
+class TopSchemaVersionTests(unittest.TestCase):
+    def setUp(self):
+        self.session = Mock()
+        self.migrator = Migrator('./migrations', self.session)
+
+    def test_it_should_return_zero_initially(self):
+        self.session.execute = Mock(return_value=[])
+
+        self.assertEquals(0, self.migrator.get_top_version())
+
+    def test_it_should_return_the_highest_version_from_schema_migrations(self):
+        self.session.execute = Mock(return_value=[Mock(version=7)])
+        version = self.migrator.get_top_version()
+
+        self.session.execute.assert_called_with('SELECT * from schema_migrations LIMIT 1')
+        self.assertEquals(version, 7)
 
 
 def main():

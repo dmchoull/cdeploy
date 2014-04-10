@@ -26,7 +26,8 @@ class Migrator:
         return int(file_name.split('_')[0])
 
     def get_top_version(self):
-        pass
+        result = self.session.execute('SELECT * from schema_migrations LIMIT 1')
+        return result[0].version if len(result) > 0 else 0
 
     def apply_migration(self, migration_content):
         self.session.execute(migration_content)
