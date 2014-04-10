@@ -5,6 +5,10 @@ class Migrator:
     def __init__(self, migrations_path, session):
         self.migrations_path = migrations_path
         self.session = session
+        self.session.execute("""
+            CREATE TABLE IF NOT EXISTS schema_migrations (type text, version int, PRIMARY KEY(type, version))
+            WITH COMMENT = 'Schema migration history' AND CLUSTERING ORDER BY (version DESC)
+        """)
 
     def run_migrations(self):
         for file_name in os.listdir(self.migrations_path):
