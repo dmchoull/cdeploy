@@ -21,15 +21,25 @@ class MigratorTests(unittest.TestCase):
     def test_it_should_initially_apply_all_the_migrations(self):
         self.migrator.update_schema_migrations = Mock()
         self.migrator.run_migrations()
+
         self.session.execute.assert_has_calls([call(migration_1_content), call(migration_2_content)])
 
     def test_it_should_add_the_migration_versions_to_the_schema_migrations_table(self):
         self.migrator.apply_migration = Mock()
         self.migrator.run_migrations()
+
         self.session.execute.assert_has_calls([
             call("INSERT INTO schema_migrations (type, version) VALUES ('migration', 1)"),
             call("INSERT INTO schema_migrations (type, version) VALUES ('migration', 2)")
         ])
+
+    def test_it_should_only_run_migrations_that_have_not_been_applied(self):
+        self.migrator.update_schema_migrations = Mock()
+        self.session.execute.reset_mock()
+        self.migrator.get_top_version = Mock(return_value=1)
+        self.migrator.run_migrations()
+
+        self.session.execute.assert_called_once_with(migration_2_content)
 
 
 def main():
