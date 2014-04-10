@@ -1,1 +1,1 @@
-CREATE TABLE users
+CREATE TABLE users (userid uuid PRIMARY KEY)
