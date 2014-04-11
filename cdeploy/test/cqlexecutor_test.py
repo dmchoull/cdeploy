@@ -1,6 +1,6 @@
 import unittest
 from mock import *
-from cassandra_migrations.cqlexecutor import CQLExecutor
+from cdeploy.cqlexecutor import CQLExecutor
 
 
 class CQLExecutorTests(unittest.TestCase):

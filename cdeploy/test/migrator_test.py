@@ -1,9 +1,8 @@
 import unittest
-from unittest.loader import TestLoader
 import os
 from mock import *
-from cassandra_migrations import Migrator
-from cassandra_migrations import CQLExecutor
+from cdeploy import Migrator
+from cdeploy import CQLExecutor
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_MIGRATIONS_PATH = os.path.join(TEST_DIR, './migrations')
