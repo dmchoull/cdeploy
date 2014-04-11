@@ -4,9 +4,6 @@ import yaml
 from cassandra.cluster import Cluster
 from cqlexecutor import CQLExecutor
 
-DEFAULT_MIGRATIONS_PATH = './migrations'
-CONFIG_PATH = 'config/cassandra.yml'
-
 
 class Migrator:
     def __init__(self, migrations_path, session):
@@ -49,21 +46,25 @@ class Migrator:
         return int(file_name.split('_')[0])
 
 
+DEFAULT_MIGRATIONS_PATH = './migrations'
+CONFIG_FILE_PATH = 'config/cassandra.yml'
+
+
 def main():
     migrations_path = DEFAULT_MIGRATIONS_PATH if len(sys.argv) == 1 else sys.argv[1]
 
-    config = load_config(migrations_path)
-
+    config = load_config(migrations_path, os.getenv('ENV'))
     cluster = Cluster(config['hosts'])
     session = cluster.connect(config['keyspace'])
+
     migrator = Migrator(migrations_path, session)
     migrator.run_migrations()
 
 
-def load_config(migrations_path):
-    config_file = open(os.path.join(migrations_path, CONFIG_PATH))
+def load_config(migrations_path, env):
+    config_file = open(os.path.join(migrations_path, CONFIG_FILE_PATH))
     config = yaml.load(config_file)
-    return config
+    return config[env or 'development']
 
 
 if __name__ == '__main__':

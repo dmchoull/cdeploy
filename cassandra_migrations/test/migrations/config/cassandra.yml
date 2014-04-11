@@ -1,2 +1,7 @@
-hosts: [cassandra.local]
-keyspace: migration_test
+development:
+    hosts: [cassandra.local]
+    keyspace: migrations_development
+
+test:
+    hosts: [cassandra.local]
+    keyspace: migrations_test
