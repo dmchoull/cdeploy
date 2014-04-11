@@ -2,6 +2,7 @@ import os
 import sys
 import yaml
 from cassandra.cluster import Cluster
+from cassandra_migrations.cql_executor import CQLExecutor
 
 DEFAULT_MIGRATIONS_PATH = './migrations'
 CONFIG_PATH = 'config/cassandra.yml'
@@ -12,12 +13,9 @@ class Migrator:
         print('Reading migrations from {0}'.format(migrations_path))
         self.migrations_path = migrations_path
         self.session = session
-        self.session.execute("""
-            CREATE TABLE IF NOT EXISTS schema_migrations (type text, version int, PRIMARY KEY(type, version))
-            WITH COMMENT = 'Schema migration history' AND CLUSTERING ORDER BY (version DESC)
-        """)
 
     def run_migrations(self):
+        CQLExecutor.init_table(self.session)
         top_version = self.get_top_version()
 
         for dir_entry in os.listdir(self.migrations_path):
@@ -33,12 +31,12 @@ class Migrator:
         version = self.migration_version(file_name)
 
         if version > top_version:
-            self.execute(migration_script)
-            self.update_schema_migrations(version)
+            CQLExecutor.execute(self.session, migration_script)
+            CQLExecutor.update_schema_migrations(self.session, version)
             print(' -> Migration {0} applied ({1})'.format(version, file_name))
 
     def get_top_version(self):
-        result = self.session.execute('SELECT * FROM schema_migrations LIMIT 1')
+        result = CQLExecutor.get_top_version(self.session)
         top_version = result[0].version if len(result) > 0 else 0
         print('Current version is {0}'.format(top_version))
         return top_version
@@ -49,12 +47,6 @@ class Migrator:
 
     def migration_version(self, file_name):
         return int(file_name.split('_')[0])
-
-    def execute(self, migration_content):
-        self.session.execute(migration_content)
-
-    def update_schema_migrations(self, version):
-        self.session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
 
 
 def main():
