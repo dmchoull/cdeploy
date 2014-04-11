@@ -57,7 +57,7 @@ class TopSchemaVersionTests(unittest.TestCase):
         self.session.execute = Mock(return_value=[Mock(version=7)])
         version = self.migrator.get_top_version()
 
-        self.session.execute.assert_called_with('SELECT * from schema_migrations LIMIT 1')
+        self.session.execute.assert_called_with('SELECT * FROM schema_migrations LIMIT 1')
         self.assertEquals(version, 7)
 
 
