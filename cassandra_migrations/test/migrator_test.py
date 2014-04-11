@@ -1,7 +1,7 @@
 import unittest
 from mock import *
 from cassandra_migrations import Migrator
-from cassandra_migrations.cql_executor import CQLExecutor
+from cassandra_migrations import CQLExecutor
 
 migration_1_content = open('./migrations/001_create_users.cql').read()
 migration_2_content = open('./migrations/002_add_firstname.cql').read()

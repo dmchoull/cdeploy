@@ -1,8 +1,9 @@
 import os
 import sys
 import yaml
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cassandra.cluster import Cluster
-from cassandra_migrations.cql_executor import CQLExecutor
+from cassandra_migrations import CQLExecutor
 
 DEFAULT_MIGRATIONS_PATH = './migrations'
 CONFIG_PATH = 'config/cassandra.yml'
