@@ -26,7 +26,7 @@ class ApplyingMigrationTests(unittest.TestCase):
         self.session.execute.assert_has_calls([call(migration_1_content), call(migration_2_content)])
 
     def test_it_should_add_the_migration_versions_to_the_schema_migrations_table(self):
-        self.migrator.apply_migration = Mock()
+        self.migrator.execute = Mock()
         self.migrator.run_migrations()
 
         self.session.execute.assert_has_calls([

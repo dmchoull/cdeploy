@@ -1,0 +1,2 @@
+hosts: [cassandra.local]
+keyspace: migration_test
