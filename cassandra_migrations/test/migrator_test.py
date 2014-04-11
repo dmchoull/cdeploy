@@ -1,16 +1,21 @@
 import unittest
+from unittest.loader import TestLoader
+import os
 from mock import *
 from cassandra_migrations import Migrator
 from cassandra_migrations import CQLExecutor
 
-migration_1_content = open('./migrations/001_create_users.cql').read()
-migration_2_content = open('./migrations/002_add_firstname.cql').read()
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_MIGRATIONS_PATH = os.path.join(TEST_DIR, './migrations')
+
+migration_1_content = open(os.path.join(TEST_MIGRATIONS_PATH, '001_create_users.cql')).read()
+migration_2_content = open(os.path.join(TEST_MIGRATIONS_PATH, '002_add_firstname.cql')).read()
 
 
 class ApplyingMigrationTests(unittest.TestCase):
     def setUp(self):
         self.session = Mock()
-        self.migrator = Migrator('./migrations', self.session)
+        self.migrator = Migrator(TEST_MIGRATIONS_PATH, self.session)
         self.migrator.get_top_version = Mock(return_value=0)
 
     def test_it_should_make_sure_the_schema_migrations_table_exists(self):
@@ -41,7 +46,7 @@ class ApplyingMigrationTests(unittest.TestCase):
 class TopSchemaVersionTests(unittest.TestCase):
     def setUp(self):
         self.session = Mock()
-        self.migrator = Migrator('./migrations', self.session)
+        self.migrator = Migrator(TEST_MIGRATIONS_PATH, self.session)
 
     def test_it_should_return_zero_initially(self):
         CQLExecutor.get_top_version = Mock(return_value=[])

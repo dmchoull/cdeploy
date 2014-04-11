@@ -1,5 +1,4 @@
 import unittest
-import subprocess
 import os
 from cassandra.cluster import Cluster
 
@@ -14,7 +13,8 @@ def reset_db(keyspace):
 
 
 def run_migrator():
-    os.system('cd ..; python migrator.py test/migrations')
+    test_dir = os.path.dirname(os.path.realpath(__file__))
+    os.system('cd {0}/..; python migrator.py test/migrations'.format(test_dir))
 
 
 class FirstRunTest(unittest.TestCase):
