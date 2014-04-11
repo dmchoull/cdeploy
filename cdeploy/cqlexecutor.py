@@ -4,7 +4,7 @@ class CQLExecutor:
 
     @staticmethod
     def init_table(session):
-        return session.execute("""
+        session.execute("""
             CREATE TABLE IF NOT EXISTS schema_migrations (type text, version int, PRIMARY KEY(type, version))
             WITH COMMENT = 'Schema migration history' AND CLUSTERING ORDER BY (version DESC)
         """)
@@ -15,8 +15,10 @@ class CQLExecutor:
 
     @staticmethod
     def execute(session, script):
-        return session.execute(script)
+        lines = [line.strip() for line in script.split(';') if line != '']
+        for cql_statement in lines:
+            session.execute(cql_statement)
 
     @staticmethod
     def update_schema_migrations(session, version):
-        return session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
+        session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
