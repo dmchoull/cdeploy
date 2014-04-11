@@ -15,8 +15,9 @@ class CQLExecutor:
 
     @staticmethod
     def execute(session, script):
-        lines = [line.strip() for line in script.split(';') if line != '']
+        lines = [line.strip() for line in script.split(';') if line.strip() != '']
         for cql_statement in lines:
+            print('  * Executing: {0}'.format(cql_statement))
             session.execute(cql_statement)
 
     @staticmethod

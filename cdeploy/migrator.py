@@ -30,7 +30,7 @@ class Migrator:
         if version > top_version:
             CQLExecutor.execute(self.session, migration_script)
             CQLExecutor.update_schema_migrations(self.session, version)
-            print(' -> Migration {0} applied ({1})'.format(version, file_name))
+            print('  -> Migration {0} applied ({1})\n'.format(version, file_name))
 
     def get_top_version(self):
         result = CQLExecutor.get_top_version(self.session)
