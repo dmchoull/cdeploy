@@ -1,2 +1,2 @@
-from .cql_executor import CQLExecutor
+from .cqlexecutor import CQLExecutor
 from .migrator import Migrator
