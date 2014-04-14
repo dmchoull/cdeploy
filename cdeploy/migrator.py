@@ -51,7 +51,14 @@ CONFIG_FILE_PATH = 'config/cassandra.yml'
 
 
 def main():
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print 'Usage: cdeploy [path/to/migrations]'
+        return
+
     migrations_path = DEFAULT_MIGRATIONS_PATH if len(sys.argv) == 1 else sys.argv[1]
+
+    if invalid_migrations_dir(migrations_path) or missing_config(migrations_path):
+        return
 
     config = load_config(migrations_path, os.getenv('ENV'))
     cluster = Cluster(config['hosts'])
@@ -61,8 +68,29 @@ def main():
     migrator.run_migrations()
 
 
+def invalid_migrations_dir(migrations_path):
+    if not os.path.isdir(migrations_path):
+        print '"{0}" is not a directory'.format(migrations_path)
+        return True
+    else:
+        return False
+
+
+def missing_config(migrations_path):
+    config_path = config_file_path(migrations_path)
+    if not os.path.exists(os.path.join(config_path)):
+        print 'Missing configuration file "{0}"'.format(config_path)
+        return True
+    else:
+        return False
+
+
+def config_file_path(migrations_path):
+    return os.path.join(migrations_path, CONFIG_FILE_PATH)
+
+
 def load_config(migrations_path, env):
-    config_file = open(os.path.join(migrations_path, CONFIG_FILE_PATH))
+    config_file = open(config_file_path(migrations_path))
     config = yaml.load(config_file)
     return config[env or 'development']
 
