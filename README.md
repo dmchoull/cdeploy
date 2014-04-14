@@ -6,7 +6,7 @@ cdeploy is a simple tool to manage your Cassandra schema migrations.
 Installation
 =====
 
-Coming soon to pip
+```pip install cdeploy```
 
 Usage
 =====
