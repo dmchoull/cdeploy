@@ -54,6 +54,10 @@ class UndoTests(unittest.TestCase):
     def setUp(self):
         self.session = Mock()
 
+    def test_it_ignores_whitespace_and_other_text_following_the_undo_marker(self):
+        CQLExecutor.execute_undo(self.session, 'migration statement;\n\t--//@UNDO  begin undo\nundo statement')
+        self.session.execute.assert_called_once_with('undo statement')
+
     def test_it_runs_the_undo_section(self):
         CQLExecutor.execute_undo(self.session, 'migration statement;\n--//@UNDO\nundo statement')
         self.session.execute.assert_called_once_with('undo statement')

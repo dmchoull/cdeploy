@@ -49,7 +49,7 @@ def parse_cql(section_func, script):
 def migration_section_of(script):
     migration_section = ''
     for line in script.split('\n'):
-        if line == '--//@UNDO':
+        if undo_marker(line):
             break
         elif commented(line):
             continue
@@ -62,13 +62,17 @@ def undo_section_of(script):
     undo_section = ''
     in_undo = False
     for line in script.split('\n'):
-        if line == '--//@UNDO':
+        if undo_marker(line):
             in_undo = True
         elif commented(line):
             continue
         elif in_undo:
             undo_section += line + '\n'
     return undo_section
+
+
+def undo_marker(line):
+    return line.strip().startswith('--//@UNDO')
 
 
 def commented(line):
