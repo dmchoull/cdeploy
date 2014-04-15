@@ -33,7 +33,8 @@ class CQLExecutorTests(unittest.TestCase):
 
     def test_it_multi_line_statements(self):
         CQLExecutor.execute(self.session, 'statement start\nmore statement\nend statement;\nstatement\n2')
-        self.session.execute.assert_has_calls([call('statement start more statement end statement'), call('statement 2')])
+        self.session.execute.assert_has_calls(
+            [call('statement start more statement end statement'), call('statement 2')])
 
     def test_it_ignores_comments(self):
         CQLExecutor.execute(self.session, 'line1;\n--comment\n//comment\nline2')
@@ -47,6 +48,10 @@ class CQLExecutorTests(unittest.TestCase):
         CQLExecutor.update_schema_migrations(self.session, 10)
         self.session.execute.assert_called_once_with(
             "INSERT INTO schema_migrations (type, version) VALUES ('migration', 10)")
+
+    def test_it_runs_the_undo_section(self):
+        CQLExecutor.execute_undo(self.session, 'migration statement;\n--//@UNDO\nundo statement')
+        self.session.execute.assert_called_once_with('undo statement')
 
 
 if __name__ == '__main__':
