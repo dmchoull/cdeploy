@@ -31,6 +31,14 @@ class CQLExecutorTests(unittest.TestCase):
         CQLExecutor.execute(self.session, 'line1;\nline2;\n')
         self.session.execute.assert_has_calls([call('line1'), call('line2')])
 
+    def test_it_multi_line_statements(self):
+        CQLExecutor.execute(self.session, 'statement start\nmore statement\nend statement;\nstatement\n2')
+        self.session.execute.assert_has_calls([call('statement start more statement end statement'), call('statement 2')])
+
+    def test_it_ignores_comments(self):
+        CQLExecutor.execute(self.session, 'line1;\n--comment\n//comment\nline2')
+        self.session.execute.assert_has_calls([call('line1'), call('line2')])
+
     def test_it_updates_schema_migrations_with_the_migration_version(self):
         CQLExecutor.update_schema_migrations(self.session, 10)
         self.session.execute.assert_called_once_with(

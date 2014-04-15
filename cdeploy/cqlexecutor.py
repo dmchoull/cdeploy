@@ -15,11 +15,22 @@ class CQLExecutor:
 
     @staticmethod
     def execute(session, script):
-        lines = [line.strip() for line in script.split(';') if line.strip() != '']
-        for cql_statement in lines:
+        statements = parse_cql(script)
+        for cql_statement in statements:
             print('  * Executing: {0}'.format(cql_statement))
             session.execute(cql_statement)
 
     @staticmethod
     def update_schema_migrations(session, version):
         session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
+
+
+def parse_cql(script):
+    uncommented_script = '\n'.join([line for line in script.split('\n') if not comment(line)])
+    collapsed_script = uncommented_script.replace('\n', ' ')
+    statements = [line.strip() for line in collapsed_script.split(';') if line.strip() != '']
+    return statements
+
+
+def comment(line):
+    return line.startswith('--') or line.startswith('//')
