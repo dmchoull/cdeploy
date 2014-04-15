@@ -47,8 +47,3 @@ The configuration file specifies the hosts to connect to and the keyspace name, 
 The environment can be set via the ENV shell variable, and defaults to development if not specified:
 
     ENV=production cdeploy
-
-TODO
-====
- * Migration rollback
- * Rollup migrations to establish a new baseline
