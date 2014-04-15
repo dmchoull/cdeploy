@@ -42,6 +42,23 @@ class ApplyingMigrationTests(unittest.TestCase):
         CQLExecutor.execute.assert_called_once_with(self.session, migration_2_content)
 
 
+class UndoMigrationTests(unittest.TestCase):
+    def setUp(self):
+        self.session = Mock()
+        self.migrator = Migrator(TEST_MIGRATIONS_PATH, self.session)
+        self.migrator.get_top_version = Mock(return_value=2)
+
+    def test_it_should_update_the_schema_version_to_1(self):
+        CQLExecutor.update_schema_migrations = Mock()
+        self.migrator.undo()
+        CQLExecutor.update_schema_migrations.assert_called_once_with(self.session, 1)
+
+    def test_it_should_rollback_version_2(self):
+        CQLExecutor.execute_undo = Mock()
+        self.migrator.undo()
+        CQLExecutor.execute_undo.assert_called_once_with(self.session, migration_2_content)
+
+
 class TopSchemaVersionTests(unittest.TestCase):
     def setUp(self):
         self.session = Mock()

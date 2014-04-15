@@ -21,6 +21,10 @@ class CQLExecutor:
             session.execute(cql_statement)
 
     @staticmethod
+    def execute_undo(session, script):
+        pass
+
+    @staticmethod
     def update_schema_migrations(session, version):
         session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
 

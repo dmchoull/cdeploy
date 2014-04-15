@@ -21,11 +21,30 @@ class Migrator:
 
         [self.apply_migration(file_name) for file_name in new_migrations]
 
+    def undo(self):
+        top_version = self.get_top_version()
+
+        top_version_filter = \
+            lambda f: os.path.isfile(os.path.join(self.migrations_path, f)) and self.migration_version(f) == top_version
+        top_migration = self.filter_migrations(top_version_filter)[0]
+
+        CQLExecutor.execute_undo(self.session, self.read_migration(top_migration))
+        CQLExecutor.update_schema_migrations(self.session, top_version - 1)
+
+    def get_top_version(self):
+        result = CQLExecutor.get_top_version(self.session)
+        top_version = result[0].version if len(result) > 0 else 0
+        print('Current version is {0}'.format(top_version))
+        return top_version
+
     def filter_migrations(self, filter_func):
         migration_dir_listing = os.listdir(self.migrations_path)
         return filter(
             filter_func,
             migration_dir_listing)
+
+    def migration_version(self, file_name):
+        return int(file_name.split('_')[0])
 
     def apply_migration(self, file_name):
         migration_script = self.read_migration(file_name)
@@ -35,18 +54,9 @@ class Migrator:
         CQLExecutor.update_schema_migrations(self.session, version)
         print('  -> Migration {0} applied ({1})\n'.format(version, file_name))
 
-    def get_top_version(self):
-        result = CQLExecutor.get_top_version(self.session)
-        top_version = result[0].version if len(result) > 0 else 0
-        print('Current version is {0}'.format(top_version))
-        return top_version
-
     def read_migration(self, file_name):
         migration_file = open(os.path.join(self.migrations_path, file_name))
         return migration_file.read()
-
-    def migration_version(self, file_name):
-        return int(file_name.split('_')[0])
 
 
 DEFAULT_MIGRATIONS_PATH = './migrations'
