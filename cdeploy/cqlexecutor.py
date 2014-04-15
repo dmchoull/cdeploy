@@ -26,11 +26,23 @@ class CQLExecutor:
 
 
 def parse_cql(script):
-    uncommented_script = '\n'.join([line for line in script.split('\n') if not comment(line)])
-    collapsed_script = uncommented_script.replace('\n', ' ')
+    migration_script = migration_section_of(script)
+    collapsed_script = migration_script.replace('\n', ' ')
     statements = [line.strip() for line in collapsed_script.split(';') if line.strip() != '']
     return statements
 
 
-def comment(line):
+def migration_section_of(script):
+    migration_section = ''
+    for line in script.split('\n'):
+        if line == '--//@UNDO':
+            break
+        elif commented(line):
+            continue
+        else:
+            migration_section += line + '\n'
+    return migration_section
+
+
+def commented(line):
     return line.startswith('--') or line.startswith('//')

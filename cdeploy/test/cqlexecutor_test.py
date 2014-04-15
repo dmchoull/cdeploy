@@ -39,6 +39,10 @@ class CQLExecutorTests(unittest.TestCase):
         CQLExecutor.execute(self.session, 'line1;\n--comment\n//comment\nline2')
         self.session.execute.assert_has_calls([call('line1'), call('line2')])
 
+    def test_it_does_not_run_the_undo_section(self):
+        CQLExecutor.execute(self.session, 'migration statement;\n--//@UNDO\nundo statement')
+        self.session.execute.assert_called_once_with('migration statement')
+
     def test_it_updates_schema_migrations_with_the_migration_version(self):
         CQLExecutor.update_schema_migrations(self.session, 10)
         self.session.execute.assert_called_once_with(
