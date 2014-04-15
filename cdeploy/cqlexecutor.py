@@ -76,4 +76,4 @@ def undo_marker(line):
 
 
 def commented(line):
-    return line.startswith('--') or line.startswith('//')
+    return line.strip().startswith('--') or line.strip().startswith('//')

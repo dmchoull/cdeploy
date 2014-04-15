@@ -37,7 +37,7 @@ class MigrationTests(unittest.TestCase):
             [call('statement start more statement end statement'), call('statement 2')])
 
     def test_it_ignores_comments(self):
-        CQLExecutor.execute(self.session, 'line1;\n--comment\n//comment\nline2')
+        CQLExecutor.execute(self.session, 'line1;\n--comment\n//comment\n\t//comment\nline2')
         self.session.execute.assert_has_calls([call('line1'), call('line2')])
 
     def test_it_does_not_run_the_undo_section(self):
