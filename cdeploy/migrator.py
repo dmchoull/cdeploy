@@ -23,6 +23,8 @@ class Migrator:
 
     def undo(self):
         top_version = self.get_top_version()
+        if top_version == 0:
+            return
 
         top_version_filter = \
             lambda f: os.path.isfile(os.path.join(self.migrations_path, f)) and self.migration_version(f) == top_version
@@ -30,6 +32,7 @@ class Migrator:
 
         CQLExecutor.execute_undo(self.session, self.read_migration(top_migration))
         CQLExecutor.rollback_schema_migration(self.session)
+        print('  -> Migration {0} undone ({1})\n'.format(top_version, top_migration))
 
     def get_top_version(self):
         result = CQLExecutor.get_top_version(self.session)

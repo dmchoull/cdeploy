@@ -58,6 +58,12 @@ class UndoMigrationTests(unittest.TestCase):
         self.migrator.undo()
         CQLExecutor.execute_undo.assert_called_once_with(self.session, migration_2_content)
 
+    def test_it_should_do_nothing_if_at_version_0(self):
+        self.migrator.get_top_version = Mock(return_value=0)
+        CQLExecutor.execute_undo = Mock()
+        self.migrator.undo()
+        self.assertFalse(CQLExecutor.execute_undo.called)
+
 
 class TopSchemaVersionTests(unittest.TestCase):
     def setUp(self):
