@@ -12,9 +12,13 @@ def reset_db(keyspace):
         "CREATE KEYSPACE " + keyspace + " WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}")
 
 
-def run_migrator():
+def run_migrator(arg=''):
     test_dir = os.path.dirname(os.path.realpath(__file__))
-    os.system('cd {0}/..; python migrator.py test/migrations'.format(test_dir))
+    os.system('cd {0}/..; python migrator.py test/migrations {1}'.format(test_dir, arg))
+
+
+def do_undo():
+    run_migrator('--undo')
 
 
 class FirstRunTest(unittest.TestCase):
@@ -26,6 +30,18 @@ class FirstRunTest(unittest.TestCase):
         run_migrator()
         result = session.execute('SELECT * FROM migrations_development.schema_migrations LIMIT 1')
         self.assertEquals(result[0].version, 2)
+
+
+class UndoTest(unittest.TestCase):
+    def setUp(self):
+        os.unsetenv('ENV')
+        reset_db('migrations_development')
+
+    def test_undo(self):
+        run_migrator()
+        do_undo()
+        result = session.execute('SELECT * FROM migrations_development.schema_migrations LIMIT 1')
+        self.assertEquals(result[0].version, 1)
 
 
 class DatabaseEnvironmentsTest(unittest.TestCase):
