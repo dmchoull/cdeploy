@@ -3,7 +3,7 @@ from mock import *
 from cdeploy.cqlexecutor import CQLExecutor
 
 
-class CQLExecutorTests(unittest.TestCase):
+class MigrationTests(unittest.TestCase):
     def setUp(self):
         self.session = Mock()
 
@@ -45,13 +45,24 @@ class CQLExecutorTests(unittest.TestCase):
         self.session.execute.assert_called_once_with('migration statement')
 
     def test_it_updates_schema_migrations_with_the_migration_version(self):
-        CQLExecutor.update_schema_migrations(self.session, 10)
+        CQLExecutor.add_schema_migration(self.session, 10)
         self.session.execute.assert_called_once_with(
             "INSERT INTO schema_migrations (type, version) VALUES ('migration', 10)")
+
+
+class UndoTests(unittest.TestCase):
+    def setUp(self):
+        self.session = Mock()
 
     def test_it_runs_the_undo_section(self):
         CQLExecutor.execute_undo(self.session, 'migration statement;\n--//@UNDO\nundo statement')
         self.session.execute.assert_called_once_with('undo statement')
+
+    def test_it_removes_the_most_recent_schema_migration_row(self):
+        CQLExecutor.get_top_version = Mock(return_value=[Mock(version=5)])
+        CQLExecutor.rollback_schema_migration(self.session)
+        self.session.execute.assert_called_once_with(
+            "DELETE FROM schema_migrations WHERE type = 'migration' AND version = 5")
 
 
 if __name__ == '__main__':

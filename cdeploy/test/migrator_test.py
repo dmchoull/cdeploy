@@ -29,10 +29,10 @@ class ApplyingMigrationTests(unittest.TestCase):
             [call(self.session, migration_1_content), call(self.session, migration_2_content)])
 
     def test_it_should_add_the_migration_versions_to_the_schema_migrations_table(self):
-        CQLExecutor.update_schema_migrations = Mock()
+        CQLExecutor.add_schema_migration = Mock()
         self.migrator.run_migrations()
 
-        CQLExecutor.update_schema_migrations.assert_has_calls([call(self.session, 1), call(self.session, 2)])
+        CQLExecutor.add_schema_migration.assert_has_calls([call(self.session, 1), call(self.session, 2)])
 
     def test_it_should_only_run_migrations_that_have_not_been_applied(self):
         CQLExecutor.execute = Mock()
@@ -48,10 +48,10 @@ class UndoMigrationTests(unittest.TestCase):
         self.migrator = Migrator(TEST_MIGRATIONS_PATH, self.session)
         self.migrator.get_top_version = Mock(return_value=2)
 
-    def test_it_should_update_the_schema_version_to_1(self):
-        CQLExecutor.update_schema_migrations = Mock()
+    def test_it_should_rollback_the_schema_version(self):
+        CQLExecutor.rollback_schema_migration = Mock()
         self.migrator.undo()
-        CQLExecutor.update_schema_migrations.assert_called_once_with(self.session, 1)
+        CQLExecutor.rollback_schema_migration.assert_called_once_with(self.session)
 
     def test_it_should_rollback_version_2(self):
         CQLExecutor.execute_undo = Mock()

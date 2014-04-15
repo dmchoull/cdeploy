@@ -29,7 +29,7 @@ class Migrator:
         top_migration = self.filter_migrations(top_version_filter)[0]
 
         CQLExecutor.execute_undo(self.session, self.read_migration(top_migration))
-        CQLExecutor.update_schema_migrations(self.session, top_version - 1)
+        CQLExecutor.rollback_schema_migration(self.session)
 
     def get_top_version(self):
         result = CQLExecutor.get_top_version(self.session)
@@ -51,7 +51,7 @@ class Migrator:
         version = self.migration_version(file_name)
 
         CQLExecutor.execute(self.session, migration_script)
-        CQLExecutor.update_schema_migrations(self.session, version)
+        CQLExecutor.add_schema_migration(self.session, version)
         print('  -> Migration {0} applied ({1})\n'.format(version, file_name))
 
     def read_migration(self, file_name):
@@ -65,8 +65,13 @@ CONFIG_FILE_PATH = 'config/cassandra.yml'
 
 def main():
     if '--help' in sys.argv or '-h' in sys.argv:
-        print 'Usage: cdeploy [path/to/migrations]'
+        print 'Usage: cdeploy [path/to/migrations] [--undo]'
         return
+
+    undo = False
+    if '--undo' in sys.argv:
+        undo = True
+        sys.argv.remove('--undo')
 
     migrations_path = DEFAULT_MIGRATIONS_PATH if len(sys.argv) == 1 else sys.argv[1]
 
@@ -78,7 +83,11 @@ def main():
     session = cluster.connect(config['keyspace'])
 
     migrator = Migrator(migrations_path, session)
-    migrator.run_migrations()
+
+    if undo:
+        migrator.undo()
+    else:
+        migrator.run_migrations()
 
 
 def invalid_migrations_dir(migrations_path):

@@ -29,10 +29,14 @@ class CQLExecutor:
             print('  * Executing: {0}'.format(cql_statement))
             session.execute(cql_statement)
 
+    @staticmethod
+    def add_schema_migration(session, version):
+        session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
 
     @staticmethod
-    def update_schema_migrations(session, version):
-        session.execute("INSERT INTO schema_migrations (type, version) VALUES ('migration', {0})".format(version))
+    def rollback_schema_migration(session):
+        top_version = CQLExecutor.get_top_version(session)[0].version
+        session.execute("DELETE FROM schema_migrations WHERE type = 'migration' AND version = {0}".format(top_version))
 
 
 def parse_cql(section_func, script):
