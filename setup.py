@@ -11,6 +11,8 @@ setup(
     download_url='https://github.com/dmchoull/cdeploy/archive/v0.8.tar.gz',
     keywords=['cassandra', 'migrations'],
     packages=find_packages(),
+    install_requires=['PyYAML', 'cassandra-driver'],
+    tests_require=['mock'],
     test_suite="cdeploy.test",
     entry_points={
         'console_scripts': [
