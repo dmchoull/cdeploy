@@ -13,24 +13,27 @@ class Migrator:
 
     def run_migrations(self):
         CQLExecutor.init_table(self.session)
+
         top_version = self.get_top_version()
+        new_migration_filter = \
+            lambda f: os.path.isfile(os.path.join(self.migrations_path, f)) and self.migration_version(f) > top_version
+        new_migrations = self.filter_migrations(new_migration_filter)
 
-        for dir_entry in os.listdir(self.migrations_path):
-            dir_entry_path = os.path.join(self.migrations_path, dir_entry)
+        [self.apply_migration(file_name) for file_name in new_migrations]
 
-            if not os.path.isfile(dir_entry_path):
-                break
+    def filter_migrations(self, filter_func):
+        migration_dir_listing = os.listdir(self.migrations_path)
+        return filter(
+            filter_func,
+            migration_dir_listing)
 
-            self.apply_migration(dir_entry, top_version)
-
-    def apply_migration(self, file_name, top_version):
+    def apply_migration(self, file_name):
         migration_script = self.read_migration(file_name)
         version = self.migration_version(file_name)
 
-        if version > top_version:
-            CQLExecutor.execute(self.session, migration_script)
-            CQLExecutor.update_schema_migrations(self.session, version)
-            print('  -> Migration {0} applied ({1})\n'.format(version, file_name))
+        CQLExecutor.execute(self.session, migration_script)
+        CQLExecutor.update_schema_migrations(self.session, version)
+        print('  -> Migration {0} applied ({1})\n'.format(version, file_name))
 
     def get_top_version(self):
         result = CQLExecutor.get_top_version(self.session)
