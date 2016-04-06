@@ -1,3 +1,5 @@
+**This repo is not being maintained - please use the fork at: https://github.com/rackerlabs/cdeploy**
+
 cdeploy
 =======
 
